@@ -1,4 +1,4 @@
-var valorTotalParcelado, valorTotalAVista, valorParcela, numeroParcelas, rendimentoMensal, rendimentoTotal, valorDesconto;
+var valorTotalParcelado, valorTotalAVista, valorParcela, numeroParcelas, rendimentoMensal, rendimentoTotal, valorDesconto, opcaoInvestimento;
 
 // Caso de teste #01
 /*valorTotalParcelado = 1200;
@@ -27,30 +27,64 @@ var _calculaRendimento = function(saldoAtual, valorParcela, rendimentoMensal, nu
 var _valorInput = function(campo) {
   return parseInt($("#" + campo).val());
 }
+
+var _valorInputClean = function(campo) {
+  return parseInt($("#" + campo).cleanVal());
+}
+
+var _rendimentoMensal = function() {
+  rendimentoMensal = $("#rendimentoMensal").val();
+  rendimentoMensal.replace(/%/i, '');
+  rendimentoMensal.replace(/,/i, '.');
+  return parseFloat(rendimentoMensal);
+}
 var iniciaCalculo = function() {
-  valorTotalParcelado = _valorInput("valorParcelado");
-  valorTotalAVista = _valorInput("valorAVista");
+  valorTotalParcelado = _valorInputClean("valorParcelado");
+  valorTotalAVista = _valorInputClean("valorAVista");
   numeroParcelas = _valorInput("numeroParcelas");
   valorParcela = valorTotalParcelado / numeroParcelas;
-  rendimentoMensal = _valorInput("rendimentoMensal");;
+  rendimentoMensal = _rendimentoMensal();
+  opcaoInvestimento = $('input[name=optradio]:checked').attr("id").slice(-1);
+  console.log(opcaoInvestimento);
 
   // O usuario investiria o valor parcelado ou a vista?
   var saldoFinalAVista = _calculaRendimento(valorTotalAVista, valorParcela, (rendimentoMensal / 100), numeroParcelas - 1);
   var saldoFinalParcelado = _calculaRendimento(valorTotalParcelado, valorParcela, (rendimentoMensal / 100), numeroParcelas - 1);
 
-  console.log("Investindo o valor a vista: ");
-  if (saldoFinalAVista > (valorTotalParcelado - valorTotalAVista))
-    console.log("Vale a pena parcelar");
-  else
-    console.log("Vale a pena pagar a vista");
+  if (opcaoInvestimento == 1) {
+    if (saldoFinalAVista > (valorTotalParcelado - valorTotalAVista))
+      $("#alertaResultado")[0].innerHTML = "<strong>Parcele!</strong> Seus rendimentos serão maiores que o desconto";
+    else
+      $("#alertaResultado")[0].innerHTML = "<strong>Pague a vista.</strong> Seu desconto será melhor que os rendimentos.";
+  } else {
+    if (saldoFinalParcelado > (valorTotalParcelado - valorTotalAVista))
+      $("#alertaResultado")[0].innerHTML = "<strong>Parcele!</strong> Seus rendimentos serão maiores que o desconto";
+    else
+      $("#alertaResultado")[0].innerHTML = "<strong>Pague a vista.</strong> Seu desconto será melhor que os rendimentos.";
+  }
+  $("#alertaResultado").removeClass("hidden");
 
 
-  console.log("Investindo o valor total parcelado: ");
-  if (saldoFinalParcelado > (valorTotalParcelado - valorTotalAVista))
-    console.log("Vale a pena parcelar");
-  else
-    console.log("Vale a pena pagar a vista");
 }
+
+
+/* radio buttons */
+var delay = (function() {
+  var timer = 0;
+  return function(callback, ms) {
+    clearTimeout(timer);
+    timer = setTimeout(callback, ms);
+  };
+})();
+
+$('#valorParcelado').keyup(function() {
+  delay(function() {
+    $("#radioButtons").removeClass("hidden");
+  }, 200);
+});
+/* /radio buttons */
+
+
 
 
 
